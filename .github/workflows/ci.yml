@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit
+
+  build:
+    runs-on: ubuntu-latest
+    needs: unit
+    steps:
+      - uses: actions/checkout@v7
+      - run: sudo apt-get install -y zip
+      - run: make
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tab-close-to-left
+          path: tab-close-to-left.xpi
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v8
+        with:
+          name: tab-close-to-left
+          path: dist
+      # Resolve "stable" once so the cache key tracks the Firefox version tested.
+      - id: firefox
+        run: >-
+          node -e 'import("@puppeteer/browsers").then(async (b) =>
+          console.log("build=" + await b.resolveBuildId(b.Browser.FIREFOX, b.detectBrowserPlatform(), "stable")))'
+          >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: .cache
+          key: firefox-${{ runner.os }}-${{ steps.firefox.outputs.build }}
+      - run: npm run test:e2e
+        env:
+          FIREFOX_BUILD_ID: ${{ steps.firefox.outputs.build }}
+          XPI: dist/tab-close-to-left.xpi

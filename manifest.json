@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Close Tab Selects Left",
+  "version": "1.0.0",
+  "description": "When you close the active tab, select the tab to its left.",
+  "browser_specific_settings": {
+    "gecko": { "id": "{9f61ae9c-f639-4169-a3bd-7c1d0dc0f01a}", "strict_min_version": "115.0" }
+  },
+  "permissions": ["tabs", "storage"],
+  "background": { "scripts": ["background.js"] }
+}

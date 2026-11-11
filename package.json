@@ -1,0 +1,14 @@
+{
+  "name": "tab-close-to-left",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --test test/unit.test.js",
+    "test:e2e": "node --test test/e2e.test.js"
+  },
+  "devDependencies": {
+    "@puppeteer/browsers": "^2.10.0",
+    "selenium-webdriver": "^4.30.0"
+  }
+}
